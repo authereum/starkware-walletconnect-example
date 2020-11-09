@@ -317,7 +317,7 @@ function App () {
         <section>
           <div>network: Ropsten</div>
           <div>signer address: {accountAddress}</div>
-          <div>starkex address: {contractAddress}</div>
+          <div>contract address: {contractAddress}</div>
         </section>
         <section>
           <div>Connected</div>
