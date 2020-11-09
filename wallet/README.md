@@ -1,6 +1,10 @@
-# walletconnect-starkware-example
+# starkware-walletconnect-wallet-example
 
-Example app with WalletConnect and Starkware
+> Example wallet with StarkWare and WalletConnect
+
+## Demo
+
+[https://starkware-walletconnect-wallet-example.netlify.app](https://starkware-walletconnect-wallet-example.netlify.app)
 
 ## Develop
 
