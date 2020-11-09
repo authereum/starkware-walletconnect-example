@@ -14,7 +14,7 @@ code {
 
 h1 {
   font-weight: normal;
-  font-size: 1.25rem
+  font-size: 1.25rem;
 }
 
 main {
@@ -38,5 +38,5 @@ textarea {
 }
 
 pre {
-	white-space: break-spaces;
+  white-space: break-spaces;
 }

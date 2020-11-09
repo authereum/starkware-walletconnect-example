@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { EventEmitter } from 'events'
-import { providers } from 'ethers'
+import { providers, Wallet } from 'ethers'
 import WalletConnect from '@walletconnect/client'
 import StarkwareProvider from '@authereum/starkware-provider'
 import StarkwareWallet from '@authereum/starkware-wallet'
@@ -9,8 +9,14 @@ const networkId = 3
 const rpcProvider = new providers.JsonRpcProvider(
   'https://ropsten.rpc.authereum.com'
 )
-const defaultMnemonic = localStorage.getItem('mnemonic') || 'owner hover awake board copper fiber organ sudden nominee trick decline inflict'
-const ropstenContractAddress = '0x5FedCE831BD3Bdb71F938EC26f984c84f40dB477'
+const defaultMnemonic =
+  localStorage.getItem('mnemonic') ||
+  'source mask employ able profit left life situate client divert scale meat police twelve another virus erode hospital area rely spirit pass end reject'
+const defaultPrivateKey =
+  '0xb0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773'
+const defaultContractAddress =
+  localStorage.getItem('contractAddress') ||
+  '0x5FedCE831BD3Bdb71F938EC26f984c84f40dB477' // ropsten
 
 const clone = (arr: any[]) => {
   return arr.map((x: any) => Object.assign({}, x))
@@ -20,14 +26,14 @@ const store = {
   set: async (key: string, data: any) => {
     try {
       localStorage.setItem(key, JSON.stringify(data))
-    } catch(err) {
+    } catch (err) {
       localStorage.setItem(key, data)
     }
   },
   get: async (key: string) => {
     try {
       return JSON.parse(localStorage.getItem(key) as string)
-    } catch(err) {
+    } catch (err) {
       localStorage.getItem(key)
     }
   },
@@ -43,6 +49,11 @@ function App () {
   const [connected, setConnected] = React.useState<boolean>(false)
   const [callRequests, setCallRequests] = React.useState<any[]>([])
   const [mnemonic, setMnemonic] = React.useState<string>(defaultMnemonic)
+  const [privateKey, setPrivateKey] = React.useState<string>(defaultPrivateKey)
+  const [accountAddress, setAccountAddress] = React.useState<string>('')
+  const [contractAddress, setContractAddress] = React.useState<string>(
+    defaultContractAddress
+  )
   const [provider, setProvider] = React.useState<StarkwareProvider>()
 
   const getSession = () => {
@@ -60,10 +71,20 @@ function App () {
   }
 
   useEffect(() => {
-    const wallet = new StarkwareWallet(mnemonic, rpcProvider, store)
-    const starkwareProvider = new StarkwareProvider(wallet, ropstenContractAddress)
-    setProvider(starkwareProvider)
-  }, [mnemonic])
+    try {
+      const starkWallet = new StarkwareWallet(mnemonic, rpcProvider, store)
+      const signerWallet = new Wallet(privateKey, rpcProvider)
+      const starkwareProvider = new StarkwareProvider(
+        starkWallet,
+        signerWallet,
+        contractAddress
+      )
+      setProvider(starkwareProvider)
+      setAccountAddress(signerWallet.address)
+    } catch (err) {
+      console.error(err)
+    }
+  }, [mnemonic, privateKey, contractAddress])
 
   useEffect(() => {
     const session = getSession()
@@ -204,6 +225,9 @@ function App () {
     const connectUri = event.target.value
     setConnectUri(connectUri)
   }
+  const clearLocalStorage = () => {
+    localStorage.clear()
+  }
   const connect = async () => {
     const walletConnector = new WalletConnect({
       uri: connectUri
@@ -224,7 +248,10 @@ function App () {
     const callRequest = callRequests.splice(idx, 1)[0]
 
     try {
-      const response = await provider?.resolve(callRequest)
+      const response = await provider?.resolve(callRequest, {
+        gasLimit: '0x7a120', // 500k
+        gasPrice: '0x6fc23ac00' // 30gwei
+      })
       console.log('RESPONSE', response)
       if (response.error) {
         throw new Error(response.error.message)
@@ -257,6 +284,16 @@ function App () {
     setMnemonic(mnemonic)
     localStorage.setItem('mnemonic', mnemonic)
   }
+  const handlePrivateKey = (event: any) => {
+    const privateKey = event.target.value
+    setPrivateKey(privateKey)
+    localStorage.setItem('privateKey', privateKey)
+  }
+  const handleContractAddress = (event: any) => {
+    const contractAddress = event.target.value
+    setContractAddress(contractAddress)
+    localStorage.setItem('contractAddress', contractAddress)
+  }
 
   const renderCallRequest = (callRequest: any, idx: number) => {
     return (
@@ -278,6 +315,11 @@ function App () {
     return (
       <div>
         <section>
+          <div>network: Ropsten</div>
+          <div>signer address: {accountAddress}</div>
+          <div>starkex address: {contractAddress}</div>
+        </section>
+        <section>
           <div>Connected</div>
           <div>
             <button onClick={disconnect}>Disconnect</button>
@@ -291,13 +333,38 @@ function App () {
     return (
       <div>
         <section>
-          <label>Mnemonic</label>
+          <label>network: Ropsten</label>
+        </section>
+        <section>
+          <label>Stark mnemonic</label>
           <div>
             <input
               type='mnemonic'
               placeholder='mnemonic'
               value={mnemonic}
               onChange={handleMnemonic}
+            />
+          </div>
+        </section>
+        <section>
+          <label>Transaction signer private key</label>
+          <div>
+            <input
+              type='privateKey'
+              placeholder='signer private key'
+              value={privateKey}
+              onChange={handlePrivateKey}
+            />
+          </div>
+        </section>
+        <section>
+          <label>StarkEx contract</label>
+          <div>
+            <input
+              type='contractAddress'
+              placeholder='contract address'
+              value={contractAddress}
+              onChange={handleContractAddress}
             />
           </div>
         </section>
@@ -312,6 +379,7 @@ function App () {
             />
           </div>
           <button onClick={connect}>Connect</button>
+          <button onClick={clearLocalStorage}>clear local storage</button>
         </section>
       </div>
     )

@@ -16,33 +16,16 @@
   dependencies:
     tslib "^1.9.0"
 
-"@authereum/starkware-controller@1.7.8-beta.2":
-  version "1.7.8-beta.2"
-  resolved "https://registry.yarnpkg.com/@authereum/starkware-controller/-/starkware-controller-1.7.8-beta.2.tgz#27c35c7734cc07a6e02c182891bb20d075b27e7c"
-  integrity sha512-S0Tlnd9/xGUA7GK5LQOYBQDXcvdcdeT+nBEdVohwC5J+Ef/EgABK/OVVqYWUQTEyg7BJpEHzCO0bWKSKjqu/aA==
+"@authereum/starkware-controller@1.7.8-beta.3":
+  version "1.7.8-beta.3"
+  resolved "https://registry.yarnpkg.com/@authereum/starkware-controller/-/starkware-controller-1.7.8-beta.3.tgz#f350abaed4edbda656cfff1f9878a65df44d1de0"
+  integrity sha512-XzAeAfU3hm+hWWDe9f0CvC/SLLwdE0nPumsfCnWFo5iB5sPh6AS7XAsQsWe7JDiUxdt61Kc0gzpnebfictntaw==
   dependencies:
-    "@authereum/starkware-crypto" "1.9.7-beta.6"
+    "@authereum/starkware-crypto" "1.9.7-beta.7"
     "@authereum/starkware-types" "1.2.0-beta.1"
     "@babel/core" "^7.12.3"
     enc-utils "^2.2.2"
     ethers "^5.0.19"
-
-"@authereum/starkware-crypto@1.9.7-beta.6":
-  version "1.9.7-beta.6"
-  resolved "https://registry.yarnpkg.com/@authereum/starkware-crypto/-/starkware-crypto-1.9.7-beta.6.tgz#1cfacc97bbc9673964c16edecabb0aa4e33a1ca0"
-  integrity sha512-QeCDSqSw1Py51tpRUo4FSrHEWgqXDiQYBoQgdRcwsSOjhS+75+YtmMl8gcpFrcDtkYsi0Wu/Z1IyOtzji4T9Tw==
-  dependencies:
-    "@authereum/starkware-types" "1.2.0-beta.1"
-    bip39 "^3.0.2"
-    bn.js "^5.1.2"
-    elliptic "^6.5.3"
-    enc-utils "^2.2.2"
-    ethereumjs-wallet "^1.0.0"
-    hash.js "^1.1.7"
-    js-sha3 "^0.8.0"
-    keccak256 "^1.0.2"
-    rsv-signature "^1.1.0"
-    web3-utils "^1.3.0"
 
 "@authereum/starkware-crypto@1.9.7-beta.7":
   version "1.9.7-beta.7"
@@ -62,14 +45,14 @@
     web3-utils "^1.3.0"
 
 "@authereum/starkware-provider@^1.6.4-beta.0":
-  version "1.6.4-beta.3"
-  resolved "https://registry.yarnpkg.com/@authereum/starkware-provider/-/starkware-provider-1.6.4-beta.3.tgz#25ead1d7b3095d2260d14edf966aba17e2028928"
-  integrity sha512-1knbK3k5WZq3BPJTbJVNW2SyPjdGXh9x8ENROxxCpk5FPOiNWYNz6fRSfB8OmS3UNMpY5eB3IA20WZVrNjK/uQ==
+  version "1.6.4-beta.6"
+  resolved "https://registry.yarnpkg.com/@authereum/starkware-provider/-/starkware-provider-1.6.4-beta.6.tgz#27f7bd154ba78bf41c9b28231e7a6154f7a2297c"
+  integrity sha512-6vsSZ/nN+b7QMUemg7jEeo2Q715XAFyyidZkq+12xB9V9hp+IsI/EENE3RaBl+Otro+QI0tw4A5p6JzIjgGHEQ==
   dependencies:
-    "@authereum/starkware-controller" "1.7.8-beta.2"
+    "@authereum/starkware-controller" "1.7.8-beta.3"
     "@authereum/starkware-crypto" "1.9.7-beta.7"
     "@authereum/starkware-types" "1.2.0-beta.1"
-    "@authereum/starkware-wallet" "1.2.2-beta.1"
+    "@authereum/starkware-wallet" "1.2.2-beta.2"
     "@babel/core" "^7.12.3"
     basic-provider "^1.6.1"
     enc-utils "^2.2.2"
@@ -81,12 +64,12 @@
   resolved "https://registry.yarnpkg.com/@authereum/starkware-types/-/starkware-types-1.2.0-beta.1.tgz#d8e710865bd1f1be1a838da30041c3afd2124844"
   integrity sha512-7TOskv42zRtKItSTMnKdgNdXWxP0JyydjwFiibGeuDDFJ3bGB4iNGEpwsCx7DThKm95zge7Bap7BRsuwL/yjhw==
 
-"@authereum/starkware-wallet@1.2.2-beta.1", "@authereum/starkware-wallet@^1.2.2-beta.0":
-  version "1.2.2-beta.1"
-  resolved "https://registry.yarnpkg.com/@authereum/starkware-wallet/-/starkware-wallet-1.2.2-beta.1.tgz#e407a01d5520d42435fbd13b8288e0b524dc7210"
-  integrity sha512-Iu1lpRGvmvuO+Alq8M2BAjshisFvXiGBAdjmctOGYnIjYDbUGyy2aCYSgcP+8loeLyeLJJtpCUGh1xhe52OgBA==
+"@authereum/starkware-wallet@1.2.2-beta.2":
+  version "1.2.2-beta.2"
+  resolved "https://registry.yarnpkg.com/@authereum/starkware-wallet/-/starkware-wallet-1.2.2-beta.2.tgz#6bb5bff6e2369bd537886e5b081acef23d2f3686"
+  integrity sha512-iXJvcyPiCye8vlDPTs9ULrylEJEiIb3MzDRDe2N5Pubf7FWRo6ozeq95ddR5WybJhgOF1xnT8mIAIuA4LOnpmQ==
   dependencies:
-    "@authereum/starkware-crypto" "1.9.7-beta.6"
+    "@authereum/starkware-crypto" "1.9.7-beta.7"
     bn.js "^5.1.3"
     enc-utils "^2.2.2"
     ethers "^5.0.19"
