@@ -64,12 +64,42 @@ function App () {
     )
   })
   const [transferSignature, setTransferSignature] = React.useState<string>('')
+  const [orderParams, setOrderParams] = React.useState<string>(() => {
+    return (
+      localStorage.getItem('orderParams') ||
+      JSON.stringify(
+        {
+          sell: {
+            type: 'ETH',
+            data: {
+              quantum: '10'
+            },
+            amount: '1',
+            vaultId: '1'
+          },
+          buy: {
+            type: 'ETH',
+            data: {
+              quantum: '10'
+            },
+            amount: '1',
+            vaultId: '5'
+          },
+          nonce: '1597237097',
+          expirationTimestamp: `${Math.floor(Date.now() / (1000 * 3600)) + 720}`
+        },
+        null,
+        2
+      )
+    )
+  })
+  const [orderSignature, setOrderSignature] = React.useState<string>('')
   const [depositParams, setDepositParams] = React.useState<string>(() => {
     return (
       localStorage.getItem('depositParams') ||
       JSON.stringify(
         {
-          amount: '1',
+          amount: '100000000000000000',
           asset: {
             type: 'ETH',
             data: {
@@ -311,6 +341,33 @@ function App () {
     )
   }
 
+  const handleOrderParamsChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    const params = event.target.value
+    setOrderParams(params)
+    localStorage.setItem('orderParams', params)
+  }
+  const limitOrder = async () => {
+    try {
+      const payload = JSON.parse(orderParams)
+      const { starkSignature } = await sendRequest('stark_createOrder', payload)
+      setOrderSignature(starkSignature)
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+  const renderLimitOrder = () => {
+    return (
+      <section>
+        <textarea
+          value={orderParams}
+          onChange={handleOrderParamsChange}
+        ></textarea>
+        <button onClick={limitOrder}>Limit order signature</button>
+        {orderSignature && <div>Signature: {orderSignature}</div>}
+      </section>
+    )
+  }
+
   const renderConnected = () => {
     return (
       <div>
@@ -320,6 +377,7 @@ function App () {
         {renderDeposit()}
         {renderWithdraw()}
         {renderTransfer()}
+        {renderLimitOrder()}
       </div>
     )
   }
