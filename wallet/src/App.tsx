@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react'
-import { EventEmitter } from 'events'
 import { providers, Wallet } from 'ethers'
-import WalletConnect from '@walletconnect/client'
 import StarkwareProvider from '@authereum/starkware-provider'
 import StarkwareWallet from '@authereum/starkware-wallet'
 
@@ -43,10 +41,8 @@ const store = {
 }
 
 function App () {
-  const [ee] = React.useState(() => new EventEmitter())
-  const [wc, setWC] = React.useState<WalletConnect>()
   const [connectUri, setConnectUri] = React.useState<string>('')
-  const [connected, setConnected] = React.useState<boolean>(false)
+  const [connected, setConnected] = React.useState<boolean | undefined>(false)
   const [callRequests, setCallRequests] = React.useState<any[]>([])
   const [mnemonic, setMnemonic] = React.useState<string>(defaultMnemonic)
   const [privateKey, setPrivateKey] = React.useState<string>(defaultPrivateKey)
@@ -55,20 +51,6 @@ function App () {
     defaultContractAddress
   )
   const [provider, setProvider] = React.useState<StarkwareProvider>()
-
-  const getSession = () => {
-    try {
-      // localStorage 'walletconnect' value is set by walletconnect library
-      const session = localStorage.getItem('walletconnect')
-      if (!session) {
-        return null
-      }
-
-      return JSON.parse(session)
-    } catch (err) {
-      return null
-    }
-  }
 
   useEffect(() => {
     try {
@@ -87,37 +69,10 @@ function App () {
   }, [mnemonic, privateKey, contractAddress])
 
   useEffect(() => {
-    const session = getSession()
-    if (session) {
-      const walletConnector = new WalletConnect({ session })
-      setWC(walletConnector)
-      setConnected(walletConnector.connected)
-    }
-  }, [setConnected])
-
-  // walletconnect doesn't have a way to unsubscribe from event emitter,
-  // so we use a custom event emitter as a workaround.
-  useEffect(() => {
-    const events = [
-      'connect',
-      'disconnect',
-      'session_request',
-      'session_update',
-      'call_request',
-      'wc_sessionRequest',
-      'wc_sessionUpdate',
-      'error',
-      'transport_open',
-      'transport_close'
-    ]
-    for (let name of events) {
-      wc?.on(name, (...args: any[]) => ee.emit(name, ...args))
-    }
-  }, [wc, ee])
+    setConnected(provider?.wc.connected)
+  }, [setConnected, provider])
 
   useEffect(() => {
-    if (!wc) return
-
     const handleCallRequest = async (err: Error | null, payload: any) => {
       console.debug('walletConnector.on("call_request")', payload)
       if (err) {
@@ -144,7 +99,7 @@ function App () {
       }
 
       setConnectUri('')
-      setConnected(wc.connected)
+      setConnected(provider?.wc.connected)
     }
     const handleSessionRequest = async (err: Error | null, payload: any) => {
       console.debug('walletConnector.on("session_request")', payload)
@@ -153,7 +108,7 @@ function App () {
         return
       }
 
-      wc.approveSession({
+      provider?.wc.approveSession({
         chainId: networkId,
         accounts: []
       })
@@ -196,30 +151,30 @@ function App () {
       }
     }
 
-    ee.on('connect', handleConnect)
-    ee.on('disconnect', handleDisconnect)
-    ee.on('session_request', handleSessionRequest)
-    ee.on('session_update', handleSessionUpdate)
-    ee.on('call_request', handleCallRequest)
-    ee.on('wc_sessionRequest', handleWcSessionRequest)
-    ee.on('wc_sessionUpdate', handleWcSessionUpdate)
-    ee.on('error', handleError)
-    ee.on('transport_open', handleTransportOpen)
-    ee.on('transport_close', handleTransportClose)
+    provider?.wc.on('connect', handleConnect)
+    provider?.wc.on('disconnect', handleDisconnect)
+    provider?.wc.on('session_request', handleSessionRequest)
+    provider?.wc.on('session_update', handleSessionUpdate)
+    provider?.wc.on('call_request', handleCallRequest)
+    provider?.wc.on('wc_sessionRequest', handleWcSessionRequest)
+    provider?.wc.on('wc_sessionUpdate', handleWcSessionUpdate)
+    provider?.wc.on('error', handleError)
+    provider?.wc.on('transport_open', handleTransportOpen)
+    provider?.wc.on('transport_close', handleTransportClose)
 
     return () => {
-      ee.off('connect', handleConnect)
-      ee.off('disconnect', handleDisconnect)
-      ee.off('session_request', handleSessionRequest)
-      ee.off('session_update', handleSessionUpdate)
-      ee.off('call_request', handleCallRequest)
-      ee.off('wc_sessionRequest', handleWcSessionRequest)
-      ee.off('wc_sessionUpdate', handleWcSessionUpdate)
-      ee.off('error', handleError)
-      ee.off('transport_open', handleTransportOpen)
-      ee.off('transport_close', handleTransportClose)
+      provider?.wc.off('connect', handleConnect)
+      provider?.wc.off('disconnect', handleDisconnect)
+      provider?.wc.off('session_request', handleSessionRequest)
+      provider?.wc.off('session_update', handleSessionUpdate)
+      provider?.wc.off('call_request', handleCallRequest)
+      provider?.wc.off('wc_sessionRequest', handleWcSessionRequest)
+      provider?.wc.off('wc_sessionUpdate', handleWcSessionUpdate)
+      provider?.wc.off('error', handleError)
+      provider?.wc.off('transport_open', handleTransportOpen)
+      provider?.wc.off('transport_close', handleTransportClose)
     }
-  }, [ee, wc, provider, callRequests])
+  }, [provider, callRequests])
 
   const handleConnectUri = async (event: any) => {
     const connectUri = event.target.value
@@ -229,20 +184,11 @@ function App () {
     localStorage.clear()
   }
   const connect = async () => {
-    const walletConnector = new WalletConnect({
-      uri: connectUri
-    })
-
-    setConnected(walletConnector.connected)
-
-    if (!walletConnector.connected) {
-      await walletConnector.createSession()
-    }
-
-    setWC(walletConnector)
+    await provider?.wc.connect(connectUri)
+    setConnected(provider?.wc.connected)
   }
   const disconnect = () => {
-    wc?.killSession()
+    provider?.wc.killSession()
   }
   const approve = async (idx: any) => {
     const callRequest = callRequests.splice(idx, 1)[0]
@@ -257,9 +203,9 @@ function App () {
         throw new Error(response.error.message)
       }
 
-      wc?.approveRequest(response)
+      provider?.wc.approveRequest(response)
     } catch (err) {
-      wc?.rejectRequest({
+      provider?.wc.rejectRequest({
         id: callRequest.id,
         error: {
           message: err.message
@@ -271,7 +217,7 @@ function App () {
   }
   const reject = (idx: any) => {
     const callRequest = callRequests.splice(idx, 1)[0]
-    wc?.rejectRequest({
+    provider?.wc.rejectRequest({
       id: callRequest.id,
       error: {
         message: 'cancelled'
