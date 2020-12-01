@@ -1,7 +1,9 @@
-import React, { ChangeEvent, ReactElement, useEffect, useCallback } from 'react'
+import React, { ChangeEvent, ReactElement, useEffect } from 'react'
 import WalletConnect from 'walletconnect'
+import StarkwareProvider from '@authereum/starkware-provider'
 
 function App () {
+  const [provider, setProvider] = React.useState<any>(null)
   const [wc, setWC] = React.useState<WalletConnect | null>(null)
   const [dappConfig, setDappConfig] = React.useState<string>(() => {
     return (
@@ -41,11 +43,11 @@ function App () {
       JSON.stringify(
         {
           from: {
-            starkKey: '',
             vaultId: '5'
           },
           to: {
-            starkKey: '',
+            starkKey:
+              '0x0779f740681278532a60efcc9f277bae69c227a8cb07307cd8d1e6cf2b5635ea',
             vaultId: '10'
           },
           asset: {
@@ -134,19 +136,11 @@ function App () {
   })
   const [withdrawTx, setWithdrawTx] = React.useState<string>('')
 
-  const sendRequest = useCallback(
-    (method: string, params: any = {}) => {
-      if (!wc) return
-      const customRequest = {
-        id: Date.now(),
-        jsonrpc: '2.0',
-        method,
-        params
-      }
-      return wc?.connector?.sendCustomRequest(customRequest)
-    },
-    [wc]
-  )
+  useEffect(() => {
+    if (wc) {
+      setProvider(StarkwareProvider.fromWalletConnect(wc as any))
+    }
+  }, [wc])
 
   const connect = async () => {
     const wc = new WalletConnect()
@@ -164,21 +158,17 @@ function App () {
 
   useEffect(() => {
     const update = async () => {
-      if (!wc) return
+      if (!provider) return
       const { layer, application, index } = JSON.parse(dappConfig)
       try {
-        const { starkKey } = await sendRequest('stark_account', {
-          layer,
-          application,
-          index
-        })
+        const starkKey = await provider.account({ layer, application, index })
         setStarkKey(starkKey)
       } catch (err) {
         alert(err.message)
       }
 
       try {
-        const accounts = await sendRequest('eth_requestAccounts')
+        const accounts = await provider.requestAccounts()
         setAccountAddress(accounts[0])
       } catch (err) {
         alert(err.message)
@@ -186,7 +176,7 @@ function App () {
     }
 
     update()
-  }, [wc, sendRequest, dappConfig])
+  }, [dappConfig, provider])
 
   const renderStarkKey = () => {
     return (
@@ -204,10 +194,9 @@ function App () {
     setNonce(event.target.value)
   }
   const signNonce = async () => {
-    const address = wc?.connector?.accounts[0]
     const msg = nonce
     try {
-      const sig = await sendRequest('personal_sign', [msg, address])
+      const sig = await provider.personalSign(msg)
       setSignature(sig)
     } catch (err) {
       alert(err.message)
@@ -235,7 +224,7 @@ function App () {
   const register = async () => {
     try {
       const payload = JSON.parse(registerParams)
-      const { txhash } = await sendRequest('stark_register', payload)
+      const txhash = await provider.registerUser(payload)
       setRegisterTx(txhash)
     } catch (err) {
       alert(err.message)
@@ -264,7 +253,7 @@ function App () {
   const deposit = async () => {
     try {
       const payload = JSON.parse(depositParams)
-      const { txhash } = await sendRequest('stark_deposit', payload)
+      const txhash = await provider.deposit(payload)
       setDepositTx(txhash)
     } catch (err) {
       alert(err.message)
@@ -293,7 +282,7 @@ function App () {
   const withdraw = async () => {
     try {
       const payload = JSON.parse(withdrawParams)
-      const { txhash } = await sendRequest('stark_withdraw', payload)
+      const txhash = await provider.withdraw(payload)
       setWithdrawTx(txhash)
     } catch (err) {
       alert(err.message)
@@ -322,7 +311,7 @@ function App () {
   const transfer = async () => {
     try {
       const payload = JSON.parse(transferParams)
-      const { starkSignature } = await sendRequest('stark_transfer', payload)
+      const starkSignature = await provider.transfer(payload)
       setTransferSignature(starkSignature)
     } catch (err) {
       alert(err.message)
@@ -349,7 +338,7 @@ function App () {
   const limitOrder = async () => {
     try {
       const payload = JSON.parse(orderParams)
-      const { starkSignature } = await sendRequest('stark_createOrder', payload)
+      const starkSignature = await provider.createOrder(payload)
       setOrderSignature(starkSignature)
     } catch (err) {
       alert(err.message)
