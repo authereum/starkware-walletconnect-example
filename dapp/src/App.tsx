@@ -1,11 +1,80 @@
-import React, { ChangeEvent, ReactElement, useEffect } from 'react'
-import WalletConnect from 'walletconnect'
-import StarkwareProvider from '@authereum/starkware-provider'
+import React, {
+  ChangeEvent,
+  ReactElement,
+  useState,
+  useEffect,
+  useMemo
+} from 'react'
+import Onboard from '@authereum/bnc-onboard'
+
+const blocknativeDappId = '12153f55-f29e-4f11-aa07-90f10da5d778'
+const rpcUrl = 'https://ropsten.rpc.authereum.com'
+const networkId = 3
 
 function App () {
-  const [provider, setProvider] = React.useState<any>(null)
-  const [wc, setWC] = React.useState<WalletConnect | null>(null)
-  const [dappConfig, setDappConfig] = React.useState<string>(() => {
+  const [provider, setProvider] = useState<any>(null)
+  const [connected, setConnected] = useState<boolean>(false)
+  const onboard = useMemo(() => {
+    const onboard = Onboard({
+      dappId: blocknativeDappId,
+      networkId,
+      walletSelect: {
+        wallets: [
+          // { walletName: 'authereum', preferred: true },
+          {
+            walletName: 'walletConnect',
+            infuraKey: 'd5e29c9b9a9d4116a7348113f57770a8',
+            preferred: true
+          },
+          { walletName: 'metamask', preferred: true },
+          { walletName: 'ledger', rpcUrl, preferred: true },
+          {
+            walletName: 'trezor',
+            appUrl: 'example.com',
+            email: 'contact@example.com',
+            rpcUrl,
+            preferred: true
+          },
+          { walletName: 'dapper' },
+          //{ walletName: 'fortmatic', apiKey: fortmaticApiKey },
+          //{ walletName: 'portis', apiKey: portisDappId, label: 'Portis' },
+          { walletName: 'torus' },
+          //{ walletName: 'squarelink', apiKey: squarelinkClientId },
+          { walletName: 'unilogin' },
+          { walletName: 'coinbase' },
+          { walletName: 'trust', rpcUrl },
+          { walletName: 'opera' },
+          { walletName: 'operaTouch' },
+          { walletName: 'status' },
+          { walletName: 'imToken', rpcUrl }
+        ]
+      },
+      walletCheck: [
+        { checkName: 'derivationPath' },
+        { checkName: 'connect' },
+        { checkName: 'accounts' }
+        //{ checkName: 'network' },
+        //{ checkName: 'balance', minimumBalance: '100000' }
+      ],
+      starkConfig: {
+        authMessage: () => 'Sign this example message: 123',
+        exchangeAddress: '0x4a2ac1e2ba79d4b73d86b5dbd1a05a627964b33c'
+      },
+      subscriptions: {
+        wallet: wallet => {
+          console.log('wallet:', wallet)
+          console.log(`${wallet.name} connected!`)
+          setProvider(wallet.provider)
+        },
+        address: address => {
+          setConnected(!!address)
+        }
+      }
+    })
+
+    return onboard
+  }, [setProvider])
+  const [dappConfig, setDappConfig] = useState<string>(() => {
     return (
       localStorage.getItem('dappConfig') ||
       JSON.stringify(
@@ -19,11 +88,11 @@ function App () {
       )
     )
   })
-  const [starkKey, setStarkKey] = React.useState<string>('')
-  const [accountAddress, setAccountAddress] = React.useState<string>('')
-  const [nonce, setNonce] = React.useState<string>(`${Date.now()}`)
-  const [signature, setSignature] = React.useState<string>('')
-  const [registerParams, setRegisterParams] = React.useState<string>(() => {
+  const [starkKey, setStarkKey] = useState<string>('')
+  const [accountAddress, setAccountAddress] = useState<string>('')
+  const [nonce, setNonce] = useState<string>(`${Date.now()}`)
+  const [signature, setSignature] = useState<string>('')
+  const [registerParams, setRegisterParams] = useState<string>(() => {
     return (
       localStorage.getItem('registerParams') ||
       JSON.stringify(
@@ -36,8 +105,8 @@ function App () {
       )
     )
   })
-  const [registerTx, setRegisterTx] = React.useState<string>('')
-  const [transferParams, setTransferParams] = React.useState<string>(() => {
+  const [registerTx, setRegisterTx] = useState<string>('')
+  const [transferParams, setTransferParams] = useState<string>(() => {
     return (
       localStorage.getItem('transferParams') ||
       JSON.stringify(
@@ -65,8 +134,8 @@ function App () {
       )
     )
   })
-  const [transferSignature, setTransferSignature] = React.useState<string>('')
-  const [orderParams, setOrderParams] = React.useState<string>(() => {
+  const [transferSignature, setTransferSignature] = useState<string>('')
+  const [orderParams, setOrderParams] = useState<string>(() => {
     return (
       localStorage.getItem('orderParams') ||
       JSON.stringify(
@@ -95,8 +164,8 @@ function App () {
       )
     )
   })
-  const [orderSignature, setOrderSignature] = React.useState<string>('')
-  const [depositParams, setDepositParams] = React.useState<string>(() => {
+  const [orderSignature, setOrderSignature] = useState<string>('')
+  const [depositParams, setDepositParams] = useState<string>(() => {
     return (
       localStorage.getItem('depositParams') ||
       JSON.stringify(
@@ -115,8 +184,8 @@ function App () {
       )
     )
   })
-  const [depositTx, setDepositTx] = React.useState<string>('')
-  const [withdrawParams, setWithdrawParams] = React.useState<string>(() => {
+  const [depositTx, setDepositTx] = useState<string>('')
+  const [withdrawParams, setWithdrawParams] = useState<string>(() => {
     return (
       localStorage.getItem('withdrawParams') ||
       JSON.stringify(
@@ -134,30 +203,21 @@ function App () {
       )
     )
   })
-  const [withdrawTx, setWithdrawTx] = React.useState<string>('')
-
-  useEffect(() => {
-    if (wc) {
-      setProvider(StarkwareProvider.fromWalletConnect(wc as any))
-    }
-  }, [wc])
+  const [withdrawTx, setWithdrawTx] = useState<string>('')
 
   const connect = async () => {
-    const wc = new WalletConnect()
-    await wc.connect()
-    wc?.connector?.on('disconnect', () => {
-      setStarkKey('')
-      setAccountAddress('')
-    })
-    setWC(wc)
+    await onboard.walletSelect()
+    await onboard.walletCheck()
   }
   const disconnect = async () => {
-    wc?.connector?.killSession()
-    setWC(null)
+    onboard?.walletReset()
+    setStarkKey('')
+    setAccountAddress('')
   }
 
   useEffect(() => {
     const update = async () => {
+      if (!connected) return
       if (!provider) return
       const { layer, application, index } = JSON.parse(dappConfig)
       try {
@@ -165,6 +225,7 @@ function App () {
         setStarkKey(starkKey)
       } catch (err) {
         alert(err.message)
+        console.error(err)
       }
 
       try {
@@ -172,11 +233,12 @@ function App () {
         setAccountAddress(accounts[0])
       } catch (err) {
         alert(err.message)
+        console.error(err)
       }
     }
 
     update()
-  }, [dappConfig, provider])
+  }, [dappConfig, provider, connected])
 
   const renderStarkKey = () => {
     return (

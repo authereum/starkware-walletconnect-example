@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { providers, Wallet } from 'ethers'
 import StarkwareProvider from '@authereum/starkware-provider'
 import StarkwareWallet from '@authereum/starkware-wallet'
@@ -41,16 +41,16 @@ const store = {
 }
 
 function App () {
-  const [connectUri, setConnectUri] = React.useState<string>('')
-  const [connected, setConnected] = React.useState<boolean | undefined>(false)
-  const [callRequests, setCallRequests] = React.useState<any[]>([])
-  const [mnemonic, setMnemonic] = React.useState<string>(defaultMnemonic)
-  const [privateKey, setPrivateKey] = React.useState<string>(defaultPrivateKey)
-  const [accountAddress, setAccountAddress] = React.useState<string>('')
-  const [contractAddress, setContractAddress] = React.useState<string>(
+  const [connectUri, setConnectUri] = useState<string>('')
+  const [connected, setConnected] = useState<boolean | undefined>(false)
+  const [callRequests, setCallRequests] = useState<any[]>([])
+  const [mnemonic, setMnemonic] = useState<string>(defaultMnemonic)
+  const [privateKey, setPrivateKey] = useState<string>(defaultPrivateKey)
+  const [accountAddress, setAccountAddress] = useState<string>('')
+  const [contractAddress, setContractAddress] = useState<string>(
     defaultContractAddress
   )
-  const [provider, setProvider] = React.useState<StarkwareProvider>()
+  const [provider, setProvider] = useState<StarkwareProvider>()
 
   useEffect(() => {
     try {
@@ -107,10 +107,10 @@ function App () {
         console.error(err)
         return
       }
-
+console.log(accountAddress)
       provider?.wc.approveSession({
         chainId: networkId,
-        accounts: []
+        accounts: [accountAddress]
       })
     }
     const handleSessionUpdate = (err: Error | null, payload: any) => {
@@ -174,7 +174,7 @@ function App () {
       provider?.wc.off('transport_open', handleTransportOpen)
       provider?.wc.off('transport_close', handleTransportClose)
     }
-  }, [provider, callRequests])
+  }, [provider, callRequests, accountAddress])
 
   const handleConnectUri = async (event: any) => {
     const connectUri = event.target.value
@@ -184,6 +184,9 @@ function App () {
     localStorage.clear()
   }
   const connect = async () => {
+    if (!connectUri) {
+      return
+    }
     await provider?.wc.connect(connectUri)
     setConnected(provider?.wc.connected)
   }
