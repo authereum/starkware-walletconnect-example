@@ -7,14 +7,30 @@ import React, {
 } from 'react'
 import Onboard from '@authereum/bnc-onboard'
 
-const blocknativeDappId = '12153f55-f29e-4f11-aa07-90f10da5d778'
+// const blocknativeDappId = '12153f55-f29e-4f11-aa07-90f10da5d778'
+const blocknativeDappId = 'fccf560b-943a-45e9-9af3-6b19e44e167e'
 const rpcUrl = 'https://ropsten.rpc.authereum.com'
 const networkId = 3
 
 function App () {
   const [provider, setProvider] = useState<any>(null)
   const [connected, setConnected] = useState<boolean>(false)
+  const [dappConfig, setDappConfig] = useState<string>(() => {
+    return (
+      localStorage.getItem('dappConfig') ||
+      JSON.stringify(
+        {
+          layer: 'starkex',
+          application: 'starkexdemo',
+          index: '0'
+        },
+        null,
+        2
+      )
+    )
+  })
   const onboard = useMemo(() => {
+    const { layer, application, index } = JSON.parse(dappConfig)
     const onboard = Onboard({
       dappId: blocknativeDappId,
       networkId,
@@ -58,7 +74,10 @@ function App () {
       ],
       starkConfig: {
         authMessage: () => 'Sign this example message: 123',
-        exchangeAddress: '0x4a2ac1e2ba79d4b73d86b5dbd1a05a627964b33c'
+        exchangeAddress: '0x4a2ac1e2ba79d4b73d86b5dbd1a05a627964b33c',
+        layer,
+        application,
+        index
       },
       subscriptions: {
         wallet: wallet => {
@@ -73,21 +92,7 @@ function App () {
     })
 
     return onboard
-  }, [setProvider])
-  const [dappConfig, setDappConfig] = useState<string>(() => {
-    return (
-      localStorage.getItem('dappConfig') ||
-      JSON.stringify(
-        {
-          layer: 'starkex',
-          application: 'starkexdemo',
-          index: '0'
-        },
-        null,
-        2
-      )
-    )
-  })
+  }, [setProvider, dappConfig])
   const [starkKey, setStarkKey] = useState<string>('')
   const [accountAddress, setAccountAddress] = useState<string>('')
   const [nonce, setNonce] = useState<string>(`${Date.now()}`)
@@ -221,7 +226,8 @@ function App () {
       if (!provider) return
       const { layer, application, index } = JSON.parse(dappConfig)
       try {
-        const starkKey = await provider.account({ layer, application, index })
+        console.debug('demo', 'account', layer, application, index)
+        const starkKey = await provider.account(layer, application, index)
         setStarkKey(starkKey)
       } catch (err) {
         alert(err.message)
@@ -229,6 +235,7 @@ function App () {
       }
 
       try {
+        console.debug('demo', 'requestAccounts')
         const accounts = await provider.requestAccounts()
         setAccountAddress(accounts[0])
       } catch (err) {
@@ -387,7 +394,7 @@ function App () {
           onChange={handleTransferParamsChange}
         ></textarea>
         <button onClick={transfer}>Transfer signature</button>
-        {transferSignature && <div>Signature: {transferSignature}</div>}
+        {transferSignature && <div>Signature: {JSON.stringify(transferSignature)}</div>}
       </section>
     )
   }
@@ -414,7 +421,7 @@ function App () {
           onChange={handleOrderParamsChange}
         ></textarea>
         <button onClick={limitOrder}>Limit order signature</button>
-        {orderSignature && <div>Signature: {orderSignature}</div>}
+        {orderSignature && <div>Signature: {JSON.stringify(orderSignature)}</div>}
       </section>
     )
   }
