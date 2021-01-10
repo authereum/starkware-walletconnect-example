@@ -6,11 +6,56 @@ import React, {
   useMemo
 } from 'react'
 import Onboard from '@authereum/bnc-onboard'
+import defaults from './defaults'
 
 // const blocknativeDappId = '12153f55-f29e-4f11-aa07-90f10da5d778'
 const blocknativeDappId = 'fccf560b-943a-45e9-9af3-6b19e44e167e'
 const rpcUrl = 'https://ropsten.rpc.authereum.com'
 const networkId = 3
+
+const toCamel = (str: string) => {
+  return str
+    .toLowerCase()
+    .replace(/['"]/g, '')
+    .replace(/\W+/g, ' ')
+    .replace(/ (.)/g, function ($1) {
+      return $1.toUpperCase()
+    })
+    .replace(/ /g, '')
+}
+
+function MethodBox (props: any) {
+  const { method, onSubmit } = props
+  const key = toCamel(method)
+  const [params, setParams] = useState<string>(() => {
+    return localStorage.getItem(key) || JSON.stringify(defaults[key], null, 2)
+  })
+  const [result, setResult] = useState<any>('')
+  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    const params = event.target.value
+    setParams(params)
+    localStorage.setItem(key, params)
+  }
+  const handleClick = async () => {
+    try {
+      const payload = JSON.parse(params)
+      let result: any = await onSubmit(payload)
+      if (result instanceof Object) {
+        result = JSON.stringify(result, null, 2)
+      }
+      setResult(result)
+    } catch (err) {
+      alert(err.message)
+    }
+  }
+  return (
+    <section>
+      <textarea value={params} onChange={handleChange}></textarea>
+      <button onClick={handleClick}>{method}</button>
+      {result && <div>{result}</div>}
+    </section>
+  )
+}
 
 function App () {
   const [provider, setProvider] = useState<any>(null)
@@ -18,15 +63,7 @@ function App () {
   const [dappConfig, setDappConfig] = useState<string>(() => {
     return (
       localStorage.getItem('dappConfig') ||
-      JSON.stringify(
-        {
-          layer: 'starkex',
-          application: 'starkexdemo',
-          index: '0'
-        },
-        null,
-        2
-      )
+      JSON.stringify(defaults['dappConfig'], null, 2)
     )
   })
   const onboard = useMemo(() => {
@@ -36,20 +73,19 @@ function App () {
       networkId,
       walletSelect: {
         wallets: [
-          // { walletName: 'authereum', preferred: true },
+          { walletName: 'ledger', rpcUrl, preferred: true },
+          { walletName: 'authereum', preferred: true },
+          { walletName: 'metamask', preferred: true },
           {
             walletName: 'walletConnect',
             infuraKey: 'd5e29c9b9a9d4116a7348113f57770a8',
             preferred: true
           },
-          { walletName: 'metamask', preferred: true },
-          { walletName: 'ledger', rpcUrl, preferred: true },
           {
             walletName: 'trezor',
             appUrl: 'example.com',
             email: 'contact@example.com',
-            rpcUrl,
-            preferred: true
+            rpcUrl
           },
           { walletName: 'dapper' },
           //{ walletName: 'fortmatic', apiKey: fortmaticApiKey },
@@ -80,7 +116,7 @@ function App () {
         index
       },
       subscriptions: {
-        wallet: wallet => {
+        wallet: async wallet => {
           console.log('wallet:', wallet)
           console.log(`${wallet.name} connected!`)
           setProvider(wallet.provider)
@@ -97,119 +133,6 @@ function App () {
   const [accountAddress, setAccountAddress] = useState<string>('')
   const [nonce, setNonce] = useState<string>(`${Date.now()}`)
   const [signature, setSignature] = useState<string>('')
-  const [registerParams, setRegisterParams] = useState<string>(() => {
-    return (
-      localStorage.getItem('registerParams') ||
-      JSON.stringify(
-        {
-          ethKey: '',
-          operatorSignature: ''
-        },
-        null,
-        2
-      )
-    )
-  })
-  const [registerTx, setRegisterTx] = useState<string>('')
-  const [transferParams, setTransferParams] = useState<string>(() => {
-    return (
-      localStorage.getItem('transferParams') ||
-      JSON.stringify(
-        {
-          from: {
-            vaultId: '5'
-          },
-          to: {
-            starkKey:
-              '0x0779f740681278532a60efcc9f277bae69c227a8cb07307cd8d1e6cf2b5635ea',
-            vaultId: '10'
-          },
-          asset: {
-            type: 'ETH',
-            data: {
-              quantum: '10'
-            }
-          },
-          amount: '1',
-          nonce: '123',
-          expirationTimestamp: `${Math.floor(Date.now() / (1000 * 3600)) + 720}`
-        },
-        null,
-        2
-      )
-    )
-  })
-  const [transferSignature, setTransferSignature] = useState<string>('')
-  const [orderParams, setOrderParams] = useState<string>(() => {
-    return (
-      localStorage.getItem('orderParams') ||
-      JSON.stringify(
-        {
-          sell: {
-            type: 'ETH',
-            data: {
-              quantum: '10'
-            },
-            amount: '1',
-            vaultId: '1'
-          },
-          buy: {
-            type: 'ETH',
-            data: {
-              quantum: '10'
-            },
-            amount: '1',
-            vaultId: '5'
-          },
-          nonce: '1597237097',
-          expirationTimestamp: `${Math.floor(Date.now() / (1000 * 3600)) + 720}`
-        },
-        null,
-        2
-      )
-    )
-  })
-  const [orderSignature, setOrderSignature] = useState<string>('')
-  const [depositParams, setDepositParams] = useState<string>(() => {
-    return (
-      localStorage.getItem('depositParams') ||
-      JSON.stringify(
-        {
-          amount: '100000000000000000',
-          asset: {
-            type: 'ETH',
-            data: {
-              quantum: '10'
-            }
-          },
-          vaultId: '10'
-        },
-        null,
-        2
-      )
-    )
-  })
-  const [depositTx, setDepositTx] = useState<string>('')
-  const [withdrawParams, setWithdrawParams] = useState<string>(() => {
-    return (
-      localStorage.getItem('withdrawParams') ||
-      JSON.stringify(
-        {
-          asset: {
-            type: 'ETH',
-            data: {
-              quantum: '10'
-            }
-          },
-          vaultId: '10'
-        },
-        null,
-        2
-      )
-    )
-  })
-  const [withdrawTx, setWithdrawTx] = useState<string>('')
-
   const connect = async () => {
     await onboard.walletSelect()
     await onboard.walletCheck()
@@ -283,147 +206,37 @@ function App () {
     )
   }
 
-  const handleRegisterParamsChange = (
-    event: ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    const params = event.target.value
-    setRegisterParams(params)
-    localStorage.setItem('registerParams', params)
+  const register = async (payload: any) => {
+    const txhash = await provider.registerUser(payload)
+    return txhash
   }
-  const register = async () => {
-    try {
-      const payload = JSON.parse(registerParams)
-      const txhash = await provider.registerUser(payload)
-      setRegisterTx(txhash)
-    } catch (err) {
-      alert(err.message)
-    }
+  const deposit = async (payload: any) => {
+    const txhash = await provider.deposit(payload)
+    return txhash
   }
-  const renderRegister = () => {
-    return (
-      <section>
-        <textarea
-          value={registerParams}
-          onChange={handleRegisterParamsChange}
-        ></textarea>
-        <button onClick={register}>Register</button>
-        {registerTx && <div>Tx hash: {registerTx}</div>}
-      </section>
-    )
+  const withdraw = async (payload: any) => {
+    const txhash = await provider.withdraw(payload)
+    return txhash
   }
-
-  const handleDepositParamsChange = (
-    event: ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    const params = event.target.value
-    setDepositParams(params)
-    localStorage.setItem('depositParams', params)
+  const transfer = async (payload: any) => {
+    const starkSignature = await provider.transfer(payload)
+    return starkSignature
   }
-  const deposit = async () => {
-    try {
-      const payload = JSON.parse(depositParams)
-      const txhash = await provider.deposit(payload)
-      setDepositTx(txhash)
-    } catch (err) {
-      alert(err.message)
-    }
+  const limitOrder = async (payload: any) => {
+    const starkSignature = await provider.createOrder(payload)
+    return starkSignature
   }
-  const renderDeposit = () => {
-    return (
-      <section>
-        <textarea
-          value={depositParams}
-          onChange={handleDepositParamsChange}
-        ></textarea>
-        <button onClick={deposit}>Deposit</button>
-        {depositTx && <div>Tx hash: {depositTx}</div>}
-      </section>
-    )
+  const perpetualTransfer = async (payload: any) => {
+    const starkSignature = await provider.perpetualTransfer(payload)
+    return starkSignature
   }
-
-  const handleWithdrawParamsChange = (
-    event: ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    const params = event.target.value
-    setWithdrawParams(params)
-    localStorage.setItem('withdrawParams', params)
+  const perpetualLimitOrder = async (payload: any) => {
+    const starkSignature = await provider.perpetualLimitOrder(payload)
+    return starkSignature
   }
-  const withdraw = async () => {
-    try {
-      const payload = JSON.parse(withdrawParams)
-      const txhash = await provider.withdraw(payload)
-      setWithdrawTx(txhash)
-    } catch (err) {
-      alert(err.message)
-    }
-  }
-  const renderWithdraw = () => {
-    return (
-      <section>
-        <textarea
-          value={withdrawParams}
-          onChange={handleWithdrawParamsChange}
-        ></textarea>
-        <button onClick={withdraw}>Withdraw</button>
-        {withdrawTx && <div>Tx hash: {withdrawTx}</div>}
-      </section>
-    )
-  }
-
-  const handleTransferParamsChange = (
-    event: ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    const params = event.target.value
-    setTransferParams(params)
-    localStorage.setItem('transferParams', params)
-  }
-  const transfer = async () => {
-    try {
-      const payload = JSON.parse(transferParams)
-      const starkSignature = await provider.transfer(payload)
-      setTransferSignature(starkSignature)
-    } catch (err) {
-      alert(err.message)
-    }
-  }
-  const renderTransfer = () => {
-    return (
-      <section>
-        <textarea
-          value={transferParams}
-          onChange={handleTransferParamsChange}
-        ></textarea>
-        <button onClick={transfer}>Transfer signature</button>
-        {transferSignature && <div>Signature: {JSON.stringify(transferSignature)}</div>}
-      </section>
-    )
-  }
-
-  const handleOrderParamsChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    const params = event.target.value
-    setOrderParams(params)
-    localStorage.setItem('orderParams', params)
-  }
-  const limitOrder = async () => {
-    try {
-      const payload = JSON.parse(orderParams)
-      const starkSignature = await provider.createOrder(payload)
-      setOrderSignature(starkSignature)
-    } catch (err) {
-      alert(err.message)
-    }
-  }
-  const renderLimitOrder = () => {
-    return (
-      <section>
-        <textarea
-          value={orderParams}
-          onChange={handleOrderParamsChange}
-        ></textarea>
-        <button onClick={limitOrder}>Limit order signature</button>
-        {orderSignature && <div>Signature: {JSON.stringify(orderSignature)}</div>}
-      </section>
-    )
+  const perpetualWithdraw = async (payload: any) => {
+    const starkSignature = await provider.perpetualWithdrawal(payload)
+    return starkSignature
   }
 
   const renderConnected = () => {
@@ -431,11 +244,17 @@ function App () {
       <div>
         {renderStarkKey()}
         {renderSignature()}
-        {renderRegister()}
-        {renderDeposit()}
-        {renderWithdraw()}
-        {renderTransfer()}
-        {renderLimitOrder()}
+        <MethodBox method='Register' onSubmit={register} />
+        <MethodBox method='Deposit' onSubmit={deposit} />
+        <MethodBox method='Withdraw' onSubmit={withdraw} />
+        <MethodBox method='Transfer' onSubmit={transfer} />
+        <MethodBox method='Limit Order' onSubmit={limitOrder} />
+        <MethodBox method='Perpetual Transfer' onSubmit={perpetualTransfer} />
+        <MethodBox
+          method='Perpetual Limit Order'
+          onSubmit={perpetualLimitOrder}
+        />
+        <MethodBox method='Perpetual Withdraw' onSubmit={perpetualWithdraw} />
       </div>
     )
   }

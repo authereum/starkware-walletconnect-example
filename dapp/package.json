@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@authereum/bnc-onboard": "^1.17.1-beta.15",
-    "@authereum/starkware-provider": "1.7.0-beta.14",
+    "@authereum/bnc-onboard": "1.17.1-beta.15",
+    "@authereum/starkware-provider": "1.7.0-beta.18",
     "@testing-library/jest-dom": "4.2.4",
     "@testing-library/react": "9.3.2",
     "@testing-library/user-event": "7.1.2",
@@ -23,6 +23,7 @@
   "scripts": {
     "start": "react-scripts start",
     "start:https": "HTTPS=true SSL_CRT_FILE=cert.crt SSL_KEY_FILE=cert.key react-scripts start",
+    "dev": "BROWSER=none npm start",
     "build": "react-scripts --max_old_space_size=4096 build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
