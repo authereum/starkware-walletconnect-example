@@ -67,9 +67,73 @@ const defaults: any = {
     nonce: '1597237097',
     expirationTimestamp: `${Math.floor(Date.now() / (1000 * 3600)) + 720}`
   },
-  perpetualTransfer: {},
-  perpetualLimitOrder: {},
-  perpetualWithdraw: {}
+  perpetualTransfer: {
+    asset: {
+      type: 'ETH',
+      data: {
+        quantum: '10000000000'
+      },
+      amount: '1'
+    },
+    fee: {
+      type: 'ETH',
+      data: {
+        quantum: '10000000000'
+      },
+      maxAmount: '1',
+      positionId: '1'
+    },
+    sender: {
+      positionId: '1'
+    },
+    receiver: {
+      positionId: '1',
+      starkKey:
+        '0x0779f740681278532a60efcc9f277bae69c227a8cb07307cd8d1e6cf2b5635ea'
+    },
+    nonce: '1597237',
+    expirationTimestamp: '444396',
+    condition: ''
+  },
+  perpetualLimitOrder: {
+    syntheticAsset: {
+      type: 'ETH',
+      data: {
+        quantum: '10000000000'
+      },
+      amount: '1'
+    },
+    collateralAsset: {
+      type: 'ETH',
+      data: {
+        quantum: '10000000000'
+      },
+      amount: '1'
+    },
+    isBuyingSynthetic: false,
+    fee: {
+      type: 'ETH',
+      data: {
+        quantum: '10000000000'
+      },
+      amount: '1'
+    },
+    nonce: '159723',
+    positionId: '1',
+    expirationTimestamp: '444396'
+  },
+  perpetualWithdraw: {
+    collateralAsset: {
+      type: 'ETH',
+      data: {
+        quantum: '10000000000'
+      },
+      amount: '1'
+    },
+    nonce: '1597237',
+    positionId: '1',
+    expirationTimestamp: '444396'
+  }
 }
 
 export default defaults

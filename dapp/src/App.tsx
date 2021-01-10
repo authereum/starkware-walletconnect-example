@@ -109,7 +109,7 @@ function App () {
         //{ checkName: 'balance', minimumBalance: '100000' }
       ],
       starkConfig: {
-        authMessage: () => 'Sign this example message: 123',
+        authMessage: () => 'Example auth message: 123',
         exchangeAddress: '0x4a2ac1e2ba79d4b73d86b5dbd1a05a627964b33c',
         layer,
         application,
