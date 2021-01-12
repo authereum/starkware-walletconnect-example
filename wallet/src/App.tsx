@@ -61,6 +61,7 @@ function App () {
         signerWallet,
         contractAddress
       )
+      starkwareProvider.setDebug(true)
       setProvider(starkwareProvider)
       setAccountAddress(signerWallet.address)
     } catch (err) {
@@ -107,7 +108,7 @@ function App () {
         console.error(err)
         return
       }
-console.log(accountAddress)
+
       provider?.wc.approveSession({
         chainId: networkId,
         accounts: [accountAddress]
@@ -191,7 +192,11 @@ console.log(accountAddress)
     setConnected(provider?.wc.connected)
   }
   const disconnect = () => {
+    localStorage.clear()
     provider?.wc.killSession()
+    setConnectUri('')
+    setConnected(false)
+    setAccountAddress('')
   }
   const approve = async (idx: any) => {
     const callRequest = callRequests.splice(idx, 1)[0]

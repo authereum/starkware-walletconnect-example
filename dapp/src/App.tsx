@@ -150,6 +150,7 @@ function App () {
       const { layer, application, index } = JSON.parse(dappConfig)
       try {
         console.debug('demo', 'account', layer, application, index)
+        console.debug('demo', 'provider', provider)
         const starkKey = await provider.account(layer, application, index)
         setStarkKey(starkKey)
       } catch (err) {
@@ -265,6 +266,7 @@ function App () {
   }
   const clearLocalStorage = () => {
     localStorage.clear()
+    onboard.walletReset()
   }
   const renderDisconnected = () => {
     return (

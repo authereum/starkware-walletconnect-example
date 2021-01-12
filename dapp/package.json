@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@authereum/bnc-onboard": "1.17.1-beta.16",
-    "@authereum/starkware-provider": "1.7.0-beta.20",
+    "@authereum/bnc-onboard": "1.17.1-beta.17",
+    "@authereum/starkware-provider": "1.7.0-beta.21",
     "@testing-library/jest-dom": "4.2.4",
     "@testing-library/react": "9.3.2",
     "@testing-library/user-event": "7.1.2",
