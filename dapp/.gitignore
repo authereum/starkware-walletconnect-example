@@ -31,3 +31,5 @@ package-lock.json
 .netlify
 
 *.log
+
+report.*.json

@@ -212,7 +212,10 @@ function App () {
     return txhash
   }
   const deposit = async (payload: any) => {
-    const txhash = await provider.deposit(payload)
+    const txhash = await provider.deposit(payload, {
+      //gasLimit: '0x493e0',
+      //gasPrice: '0xba43b7400'
+    })
     return txhash
   }
   const withdraw = async (payload: any) => {

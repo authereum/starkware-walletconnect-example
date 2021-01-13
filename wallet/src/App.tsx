@@ -62,8 +62,11 @@ function App () {
         contractAddress
       )
       starkwareProvider.setDebug(true)
-      setProvider(starkwareProvider)
+      console.debug('address', signerWallet.address)
       setAccountAddress(signerWallet.address)
+      setTimeout(() => {
+        setProvider(starkwareProvider)
+      }, 100)
     } catch (err) {
       console.error(err)
     }
@@ -74,6 +77,7 @@ function App () {
   }, [setConnected, provider])
 
   useEffect(() => {
+    if (!accountAddress) return
     const handleCallRequest = async (err: Error | null, payload: any) => {
       console.debug('walletConnector.on("call_request")', payload)
       if (err) {
@@ -109,6 +113,7 @@ function App () {
         return
       }
 
+      console.debug('approve session', accountAddress)
       provider?.wc.approveSession({
         chainId: networkId,
         accounts: [accountAddress]
