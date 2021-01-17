@@ -69,9 +69,10 @@ const defaults: any = {
   },
   perpetualTransfer: {
     asset: {
-      type: 'ETH',
+      type: 'SYNTHETIC',
       data: {
-        quantum: '10000000000'
+        symbol: 'BTC',
+        resolution: '10'
       },
       amount: '1'
     },
@@ -97,9 +98,10 @@ const defaults: any = {
   },
   perpetualLimitOrder: {
     syntheticAsset: {
-      type: 'ETH',
+      type: 'SYNTHETIC',
       data: {
-        quantum: '10000000000'
+        symbol: 'BTC',
+        resolution: '10'
       },
       amount: '1'
     },

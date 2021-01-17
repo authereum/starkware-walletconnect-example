@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@authereum/bnc-onboard": "1.17.1-beta.18",
-    "@authereum/starkware-provider": "1.7.0-beta.22",
+    "@authereum/bnc-onboard": "1.17.1-beta.20",
+    "@authereum/starkware-provider": "1.7.0-beta.24",
     "@testing-library/jest-dom": "4.2.4",
     "@testing-library/react": "9.3.2",
     "@testing-library/user-event": "7.1.2",
@@ -27,7 +27,8 @@
     "build": "react-scripts --max_old_space_size=4096 build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "prettier-standard --format"
+    "lint": "prettier-standard --format",
+    "deploy": "npm run build && netlify deploy --prod"
   },
   "eslintConfig": {
     "extends": "react-app"

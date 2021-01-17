@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { providers, Wallet } from 'ethers'
 import StarkwareProvider from '@authereum/starkware-provider'
 import StarkwareWallet from '@authereum/starkware-wallet'
@@ -76,6 +76,21 @@ function App () {
     setConnected(provider?.wc.connected)
   }, [setConnected, provider])
 
+  const approveCallRequest = useCallback(
+    async (callRequest: any) => {
+      const response = await provider?.resolve(callRequest, {
+        gasLimit: '0x7a120', // 500k
+        gasPrice: '0x6fc23ac00' // 30gwei
+      })
+      console.log('RESPONSE', response)
+      if (response.error) {
+        throw new Error(response.error.message)
+      }
+
+      return provider?.wc.approveRequest(response)
+    },
+    [provider]
+  )
   useEffect(() => {
     if (!accountAddress) return
     const handleCallRequest = async (err: Error | null, payload: any) => {
@@ -85,6 +100,26 @@ function App () {
         return
       }
 
+      try {
+        switch (payload.method) {
+          // auto-approve
+          case 'stark_account':
+          case 'stark_updateAccount':
+          case 'eth_accounts':
+          case 'eth_requestAccounts': {
+            await approveCallRequest(payload)
+            return
+          }
+        }
+      } catch (err) {
+        provider?.wc.rejectRequest({
+          id: payload.id,
+          error: {
+            message: err.message
+          }
+        })
+        return
+      }
       setCallRequests(clone(callRequests).concat(payload))
     }
     const handleConnect = (err: Error | null, payload: any) => {
@@ -180,7 +215,7 @@ function App () {
       provider?.wc.off('transport_open', handleTransportOpen)
       provider?.wc.off('transport_close', handleTransportClose)
     }
-  }, [provider, callRequests, accountAddress])
+  }, [provider, callRequests, accountAddress, approveCallRequest])
 
   const handleConnectUri = async (event: any) => {
     const connectUri = event.target.value
@@ -188,6 +223,7 @@ function App () {
   }
   const clearLocalStorage = () => {
     localStorage.clear()
+    window.location.reload()
   }
   const connect = async () => {
     if (!connectUri) {
@@ -205,18 +241,8 @@ function App () {
   }
   const approve = async (idx: any) => {
     const callRequest = callRequests.splice(idx, 1)[0]
-
     try {
-      const response = await provider?.resolve(callRequest, {
-        gasLimit: '0x7a120', // 500k
-        gasPrice: '0x6fc23ac00' // 30gwei
-      })
-      console.log('RESPONSE', response)
-      if (response.error) {
-        throw new Error(response.error.message)
-      }
-
-      provider?.wc.approveRequest(response)
+      await approveCallRequest(callRequest)
     } catch (err) {
       provider?.wc.rejectRequest({
         id: callRequest.id,

@@ -38,19 +38,24 @@ function MethodBox (props: any) {
   }
   const handleClick = async () => {
     try {
-      const payload = JSON.parse(params)
-      let result: any = await onSubmit(payload)
-      if (result instanceof Object) {
-        result = JSON.stringify(result, null, 2)
+      if (params) {
+        const payload = JSON.parse(params)
+        let result: any = await onSubmit(payload)
+        if (result instanceof Object) {
+          result = JSON.stringify(result, null, 2)
+        }
+        setResult(result)
+      } else {
+        let result: any = await onSubmit()
+        setResult(result)
       }
-      setResult(result)
     } catch (err) {
       alert(err.message)
     }
   }
   return (
     <section>
-      <textarea value={params} onChange={handleChange}></textarea>
+      {params && <textarea value={params} onChange={handleChange}></textarea>}
       <button onClick={handleClick}>{method}</button>
       {result && <div>{result}</div>}
     </section>
@@ -117,9 +122,11 @@ function App () {
       },
       subscriptions: {
         wallet: async wallet => {
-          console.log('wallet:', wallet)
-          console.log(`${wallet.name} connected!`)
-          setProvider(wallet.provider)
+          if (wallet.name) {
+            console.log('wallet:', wallet)
+            console.log(`${wallet.name} connected!`)
+            setProvider(wallet.provider)
+          }
         },
         address: address => {
           setConnected(!!address)
@@ -207,6 +214,10 @@ function App () {
     )
   }
 
+  const getStarkKey = async () => {
+    const starkKey = await provider.account()
+    return starkKey
+  }
   const register = async (payload: any) => {
     const txhash = await provider.registerUser(payload)
     return txhash
@@ -248,6 +259,7 @@ function App () {
       <div>
         {renderStarkKey()}
         {renderSignature()}
+        <MethodBox method='Stark Key' onSubmit={getStarkKey} />
         <MethodBox method='Register' onSubmit={register} />
         <MethodBox method='Deposit' onSubmit={deposit} />
         <MethodBox method='Withdraw' onSubmit={withdraw} />
@@ -270,6 +282,7 @@ function App () {
   const clearLocalStorage = () => {
     localStorage.clear()
     onboard.walletReset()
+    window.location.reload()
   }
   const renderDisconnected = () => {
     return (
