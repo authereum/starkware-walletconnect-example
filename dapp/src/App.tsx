@@ -138,8 +138,6 @@ function App () {
   }, [setProvider, dappConfig])
   const [starkKey, setStarkKey] = useState<string>('')
   const [accountAddress, setAccountAddress] = useState<string>('')
-  const [nonce, setNonce] = useState<string>(`${Date.now()}`)
-  const [signature, setSignature] = useState<string>('')
   const connect = async () => {
     await onboard.walletSelect()
     await onboard.walletCheck()
@@ -190,30 +188,6 @@ function App () {
       </section>
     )
   }
-  const handleNonceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setNonce(event.target.value)
-  }
-  const signNonce = async () => {
-    const msg = nonce
-    try {
-      const sig = await provider.personalSign(msg)
-      setSignature(sig)
-    } catch (err) {
-      alert(err.message)
-    }
-  }
-  const renderSignature = () => {
-    return (
-      <section>
-        <div>
-          <input type='text' value={nonce} onChange={handleNonceChange} />
-        </div>
-        <button onClick={signNonce}>Sign nonce</button>
-        {signature && <div>signature: {signature}</div>}
-      </section>
-    )
-  }
-
   const getStarkKey = async () => {
     const starkKey = await provider.account()
     return starkKey
@@ -258,7 +232,6 @@ function App () {
     return (
       <div>
         {renderStarkKey()}
-        {renderSignature()}
         <MethodBox method='Stark Key' onSubmit={getStarkKey} />
         <MethodBox method='Register' onSubmit={register} />
         <MethodBox method='Deposit' onSubmit={deposit} />
