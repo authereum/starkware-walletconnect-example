@@ -215,16 +215,16 @@ function App () {
     const starkSignature = await provider.createOrder(payload)
     return starkSignature
   }
-  const perpetualTransfer = async (payload: any) => {
-    const starkSignature = await provider.perpetualTransfer(payload)
+  const transferWithFees = async (payload: any) => {
+    const starkSignature = await provider.transferWithFees(payload)
     return starkSignature
   }
-  const perpetualLimitOrder = async (payload: any) => {
-    const starkSignature = await provider.perpetualLimitOrder(payload)
+  const limitOrderWithFees = async (payload: any) => {
+    const starkSignature = await provider.limitOrderWithFees(payload)
     return starkSignature
   }
-  const perpetualWithdraw = async (payload: any) => {
-    const starkSignature = await provider.perpetualWithdrawal(payload)
+  const withdrawWithFees = async (payload: any) => {
+    const starkSignature = await provider.withdrawWithFees(payload)
     return starkSignature
   }
 
@@ -238,12 +238,12 @@ function App () {
         <MethodBox method='Withdraw' onSubmit={withdraw} />
         <MethodBox method='Transfer' onSubmit={transfer} />
         <MethodBox method='Limit Order' onSubmit={limitOrder} />
-        <MethodBox method='Perpetual Transfer' onSubmit={perpetualTransfer} />
+        <MethodBox method='Transfer With Fees' onSubmit={transferWithFees} />
         <MethodBox
-          method='Perpetual Limit Order'
-          onSubmit={perpetualLimitOrder}
+          method='Limit Order With Fees'
+          onSubmit={limitOrderWithFees}
         />
-        <MethodBox method='Perpetual Withdraw' onSubmit={perpetualWithdraw} />
+        <MethodBox method='Withdraw With Fees' onSubmit={withdrawWithFees} />
       </div>
     )
   }

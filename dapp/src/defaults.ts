@@ -67,7 +67,7 @@ const defaults: any = {
     nonce: '1597237097',
     expirationTimestamp: `${Math.floor(Date.now() / (1000 * 3600)) + 720}`
   },
-  perpetualTransfer: {
+  transferWithFees: {
     asset: {
       type: 'SYNTHETIC',
       data: {
@@ -96,7 +96,7 @@ const defaults: any = {
     expirationTimestamp: '444396',
     condition: ''
   },
-  perpetualLimitOrder: {
+  limitOrderWithFees: {
     syntheticAsset: {
       type: 'SYNTHETIC',
       data: {
@@ -124,7 +124,7 @@ const defaults: any = {
     positionId: '1',
     expirationTimestamp: '444396'
   },
-  perpetualWithdraw: {
+  withdrawWithFees: {
     collateralAsset: {
       type: 'ETH',
       data: {
